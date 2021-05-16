@@ -168,5 +168,6 @@ espeak-tts:<br>
   words_per_minute: 160<br>
 
 ![alt text](images/board3.JPEG)
-
+![alt text](images/tail1.JPEG)
+![alt text](images/tail2.JPEG)
 Demo video in images
