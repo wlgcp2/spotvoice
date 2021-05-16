@@ -1,0 +1,207 @@
+== Install Jasper ==
+git clone https://github.com/jasperproject/jasper-client.git jasper
+sudo pip install --upgrade setuptools
+sudo pip install -r jasper/client/requirements.txt
+sudo apt-get install -y python python-dev build-essential swig git libpulse-dev
+sudo apt-get install libasound2-dev
+sudo apt-get update --allow-unauthenticated --allow-insecure-repositories
+sudo su -c "echo 'deb [trusted=yes] http://ftp.de.debian.org/debian stretch main' > /etc/apt/sources.list"
+
+== Pocketsphinx Dependency Install ==
+ - sphinxbase & pocketsphinx
+ - CMUCLMTK
+ - MIT Language Modeling Toolkit
+ - m2m-aligner
+ - OpenFST & Phonetisaurus
+
+
+--	Sphinxbase/Pocketsphinx		--
+wget http://downloads.sourceforge.net/project/cmusphinx/sphinxbase/0.8/sphinxbase-0.8.tar.gz
+tar -zxvf sphinxbase-0.8.tar.gz
+cd ~/sphinxbase-0.8/
+./configure --enable-fixed --build=aarch64-unknown-linux-gnu
+make -j4
+sudo make -j4 install
+wget http://downloads.sourceforge.net/project/cmusphinx/pocketsphinx/0.8/pocketsphinx-0.8.tar.gz
+tar -zxvf pocketsphinx-0.8.tar.gz
+cd ~/pocketsphinx-0.8/
+./configure --build=aarch64-unknown-linux-gnu
+make -j4
+sudo make -j4 install
+cd ..
+python -m pip install pocketsphinx
+
+
+--	CMUCLMTK	--
+sudo apt-get instPall subversion autoconf libtool automake gfortran g++ --yes
+
+svn co https://svn.code.sf.net/p/cmusphinx/code/trunk/cmuclmtk/
+cd cmuclmtk/
+./autogen.sh && make -j4 && sudo make -j4 install
+cd ..
+
+
+-- Phonetisaurus, m2m-aligner and MITLM --
+sudo su -c "echo 'deb http://ftp.debian.org/debian experimental main contrib non-free' > /etc/apt/sources.list.d/experimental.list"
+sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 04EE7237B7D453EC
+sudo apt-get update
+sudo apt-get -t experimental install phonetisaurus m2m-aligner mitlm libfst-tools
+
+
+-	Other	- LAST RESORT
+wget http://distfiles.macports.org/openfst/openfst-1.3.4.tar.gz
+wget https://github.com/mitlm/mitlm/releases/download/v0.4.1/mitlm_0.4.1.tar.gz
+wget https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/m2m-aligner/m2m-aligner-1.2.tar.gz
+wget https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/phonetisaurus/is2013-conversion.tgz
+
+tar -xvf m2m-aligner-1.2.tar.gz
+tar -xvf openfst-1.6.3.tar.gz #### NEED 1.6.3
+tar -xvf is2013-conversion.tgz
+tar -xvf mitlm_0.4.1.tar.gz
+
+cd openfst-1.6.3/
+sudo ./configure --enable-compact-fsts --enable-const-fsts --enable-far --enable-lookahead-fsts --enable-pdt 
+sudo make install
+
+cd m2m-aligner-1.2/
+sudo make -j4
+
+cd mitlm-0.4.1/
+sudo ./configure --build=aarch64-unknown-linux-gnu
+sudo make -j4 install
+
+cd is2013-conversion/phonetisaurus/src
+sudo make -j4
+
+sudo cp ~/m2m-aligner-1.2/m2m-aligner /usr/local/bin/m2m-aligner
+sudo cp ~/is2013-conversion/bin/phonetisaurus-g2p /usr/local/bin/phonetisaurus-g2p
+
+
+--	Build Phonetisaurus FST model	--
+wget https://www.dropbox.com/s/kfht75czdwucni1/g014b2b.tgz
+tar -xvf g014b2b.tgz
+
+cd g014b2b/
+./compile-fst.sh
+cd ..
+
+mv ~/g014b2b ~/phonetisaurus
+
+sudo apt-get install python-pyaudio
+
+== SVOX Pico TTS Install == 
+sudo apt-get update
+sudo apt-get install libttspico-utils
+
+
+
+
+
+== TEST ==
+# add repo
+sudo su -c "echo 'deb http://cognomen.co.uk/apt/debian jessie main' > /etc/apt/sources.list.d/cognomen.list"
+# import pgp key
+gpg --keyserver keyserver.ubuntu.com --recv  FC88E181D61C9391C4A49682CF36B219807AA92B && gpg --export --armor keymaster@cognomen.co.uk | sudo apt-key add -
+# update
+sudo apt-get update
+sudo apt-get install phonetisaurus m2m-aligner mitlm libfst-tools libfst1-plugins-base libfst-dev
+
+
+
+=== JULIUS ===
+Download  julius-4.3.1.tar.gz 
+tar -xf julius-4.3.1.tar.gz 
+mv julius-4.3.1.tar.gz julius
+cd ~/julius
+./configure --enable-words-int --host=aarch64-unknown-linux-gnu
+make
+sudo make install
+
+
+
+sudo apt install libx11-dev
+mkdir ~/voxforge
+cd ~/voxforge
+mkdir bin
+cd bin
+
+unpack HTK newest
+cd ~/voxforge/bin/htk/
+./configure --build=aarch64-unknown-linux-gnu
+sudo make all
+sudo make install
+
+
+=== Pico TTS=
+
+sudo apt-get install libttspico-utils
+
+
+
+
+sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 04EE7237B7D453EC
+cd is2013-conversion/phonetisaurus/src
+sudo make
+
+
+Add
+deb http://ftp.de.debian.org/debian stretch main 
+to
+/etc/apt/sources.list 
+
+
+sudo apt-get install python-pyaudio
+
+=== OR ESPEAK ===
+sudo apt-get install espeak
+
+
+
+
+8OJe5u^kR9H1kozKHwdcq4i9QwSrJDdiSdmUL%T6
+
+GOOGLE API KEY
+AIzaSyABk8VQJeX7nCNYOJCDWeaLxHMzHWr2QNg
+
+
+=== CONFIGURE JSAPER ===
+edit ~/jasper/static/keyword_phrases with 
+sudo nano ~/jasper/static/keyword_phrases
+add 
+"HEY
+SPOT
+SIT
+STAND" etc..
+
+edit ~/jasper/static/dictionary_persona.dic 
+sudo nano ~/jasper/static/dictionary_persona.dic
+Upload contents of "keyword_phrases" phrases file to
+http://www.speech.cs.cmu.edu/tools/lmtool-new.html
+
+
+
+edit /lib/modprobe.d/aliases.conf
+comment out
+# options snd-usb-audio index=-2
+
+
+edit line #120 of jasper.py
+conversation = Conversation("JASPER", self.mic, self.config)
+to
+conversation = Conversation("HEY SPOT", self.mic, self.config)
+
+
+edit 
+sudo nano /etc/modprobe.d/alsa-base.conf
+bottom lin edit
+options snd-usb-audio index=-2
+to 
+options snd-usb-audio index=0
+
+
+
+Create 
+sudo touch ~/.asouncdrc
+
+sudo apt-get install pavucontrol
+
